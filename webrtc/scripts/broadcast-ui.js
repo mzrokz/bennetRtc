@@ -21,6 +21,7 @@ var config = {
         });
 
         socket.send = function (message) {
+            debugger;
             socket.emit('message', {
                 sender: sender,
                 data: message
@@ -40,25 +41,45 @@ var config = {
         rotateAudio(audio);
     },
     onRoomFound: function (room) {
-        debugger;
         var alreadyExist = document.getElementById(room.broadcaster);
         if (alreadyExist) return;
 
         if (typeof roomsList === 'undefined') roomsList = document.body;
 
+        debugger;
         var tr = document.createElement('tr');
         tr.setAttribute('id', room.broadcaster);
-        var inputHtml = "<input type='text' id='userName'/>"
-        tr.innerHTML = '<td>' + room.roomName + '</td>' +
-            '<td>' + inputHtml + '<button class="join" id="' + room.roomToken + '">Join Room</button></td>';
+        tr.setAttribute('token', room.roomToken);
+
+        var td1 = document.createElement('td');
+        td1.innerText = room.roomName;
+        tr.appendChild(td1);
+
+        var td2 = document.createElement('td');
+        // td2.innerText = room.roomName;
+
+        var textBox = document.createElement('input');
+        textBox.setAttribute('id', 'userName');
+
+        var button = document.createElement('button');
+        button.setAttribute('id', room.roomToken);
+        button.innerText = "Join Room";
+
+        td2.appendChild(textBox);
+        td2.appendChild(button);
+        tr.appendChild(td2);
+
+        // tr.innerHTML = '<td>' + + '</td>' +
+        //     '<td>' + inputHtml + '<button class="join" id="' + room.roomToken + '">Join Room</button></td>';
         roomsList.insertBefore(tr, roomsList.firstChild);
 
-        tr.onclick = function () {
-            tr = this;
+        button.onclick = function () {
             captureUserMedia(function () {
+                var token = tr.getAttribute('token');
                 broadcastUI.joinRoom({
-                    roomToken: tr.querySelector('.join').id,
-                    joinUser: tr.id
+                    roomToken: token,
+                    joinUser: tr.id,
+                    userName: textBox.value
                 });
             });
             hideUnnecessaryStuff();
@@ -76,6 +97,7 @@ function createButtonClickHandler() {
 }
 
 function captureUserMedia(callback) {
+    debugger;
     var audio = document.createElement('audio');
     audio.setAttribute('autoplay', true);
     audio.setAttribute('controls', true);

@@ -5,25 +5,26 @@
 // This library is known as multi-user connectivity wrapper!
 // It handles connectivity tasks to make sure two or more users can interconnect!
 
-var broadcast = function(config) {
+var broadcast = function (config) {
     var self = {
         userToken: uniqueToken()
     },
         channels = '--',
         isbroadcaster,
         isGetNewRoom = true,
-        publicSocket = { };
+        publicSocket = {};
 
     function openPublicSocket() {
         publicSocket = config.openSocket({
             onmessage: onPublicSocketResponse,
-            callback: function(socket) {
+            callback: function (socket) {
                 publicSocket = socket;
             }
         });
     }
 
     function onPublicSocketResponse(response) {
+        debugger;
         if (response.userToken == self.userToken) return;
 
         if (isGetNewRoom && response.roomToken && response.broadcaster) config.onRoomFound(response);
@@ -43,12 +44,12 @@ var broadcast = function(config) {
         var socketConfig = {
             channel: _config.channel,
             onmessage: socketResponse,
-            onopen: function() {
+            onopen: function () {
                 if (isofferer && !peer) initPeer();
             }
         };
 
-        socketConfig.callback = function(_socket) {
+        socketConfig.callback = function (_socket) {
             socket = _socket;
             this.onopen();
         };
@@ -57,12 +58,12 @@ var broadcast = function(config) {
             isofferer = _config.isofferer,
             gotstream,
             audio = document.createElement('audio'),
-            inner = { },
+            inner = {},
             peer;
 
         var peerConfig = {
             attachStream: config.attachStream,
-            onICE: function(candidate) {
+            onICE: function (candidate) {
                 socket.send({
                     userToken: self.userToken,
                     candidate: {
@@ -71,7 +72,7 @@ var broadcast = function(config) {
                     }
                 });
             },
-            onRemoteStream: function(stream) {
+            onRemoteStream: function (stream) {
                 if (!stream) return;
 
                 audio.srcObject = stream;
@@ -102,8 +103,8 @@ var broadcast = function(config) {
         }
 
         function onRemoteStreamStartsFlowing() {
-            audio.addEventListener('play', function() {
-                setTimeout(function() {
+            audio.addEventListener('play', function () {
+                setTimeout(function () {
                     audio.muted = false;
                     audio.volume = 1;
 
@@ -201,7 +202,7 @@ var broadcast = function(config) {
     /*********************/
 
     function uniqueToken() {
-        var s4 = function() {
+        var s4 = function () {
             return Math.floor(Math.random() * 0x10000).toString(16);
         };
         return s4() + s4() + "-" + s4() + "-" + s4() + "-" + s4() + "-" + s4() + s4() + s4();
@@ -209,7 +210,8 @@ var broadcast = function(config) {
 
     openPublicSocket();
     return {
-        createRoom: function(_config) {
+        createRoom: function (_config) {
+            debugger;
             self.roomName = _config.roomName || 'Anonymous';
             self.roomToken = uniqueToken();
 
@@ -217,7 +219,8 @@ var broadcast = function(config) {
             isGetNewRoom = false;
             startBroadcasting();
         },
-        joinRoom: function(_config) {
+        joinRoom: function (_config) {
+            debugger;
             self.roomToken = _config.roomToken;
             isGetNewRoom = false;
 
@@ -228,7 +231,8 @@ var broadcast = function(config) {
             publicSocket.send({
                 participant: true,
                 userToken: self.userToken,
-                joinUser: _config.joinUser
+                joinUser: _config.joinUser,
+                userName: _config.userName
             });
         }
     };
